@@ -7,10 +7,17 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+#include <string>
 
 const int INF = std::numeric_limits<int>::max();
 
 using namespace std;
+
+void print_for_dijkstra(vector<double> vec) {
+	for (int i = 0; i < vec.size(); ++i) {
+		cout << "to " << i << " is " << vec[i] << endl;
+	}
+}
 
 template<typename V, typename Distance = double>
 class Graph {
@@ -33,6 +40,13 @@ private:
 			}
 		}
 		cout << from << " ";
+	}
+	void rework_for_chill_life() {
+		size_t count = 0;
+		for (auto& i : _graph) {
+			i._num = count;
+			count++;
+		}
 	}
 public:
 	//HELP
@@ -74,11 +88,9 @@ public:
 		}
 		return true;
 	}
-	void add_vertex(int num, V val) {
-		if (!has_vertex(num))
-			_graph.push_back({ num,val });
-		else
-			_graph[num]._val = val;
+	void add_vertex(V val) {
+		int new_num = _graph.size();
+		_graph.push_back({ new_num,val });
 	}
 	void remove_vertex(int num) {
 		for (auto& vertex : _graph) {
@@ -89,6 +101,7 @@ public:
 				return v._num == num;
 			}
 		), _graph.end());
+		rework_for_chill_life();
 	}
 	//EDGE
 	void add_edge(int from, int to, Distance val) {
@@ -141,7 +154,7 @@ public:
 			int u = queue.top().second;
 			queue.pop();
 
-			for (auto& edge: _graph[u]._edge) {
+			for (auto& edge: (*this)[u]._edge) {
 				int v = edge._num;
 				int weight = edge._val;
 
@@ -151,15 +164,12 @@ public:
 				}
 			}
 		}
-		/*for (int i = 0; i < size(); i++) {
-			std::cout << "Shortest distance from vertex " << from << " to vertex " << i << " is " << distance[i] << std::endl;
-		}*/
 		return distance;
 	}
-	int find_graph_center() {
+	V find_graph_center() {
 		int center = -1;
 		int max_dist = -1;
-		for (auto& vertex: _graph/*int i = 0; i < size(); ++i*/) {
+		for (auto& vertex: _graph) {
 			vector<double> dist = Dijkstra(vertex._num);
 			int max_d = *max_element(dist.begin(), dist.end());
 			if (max_d < max_dist || max_dist == -1) {
@@ -167,6 +177,6 @@ public:
 				center = vertex._num;
 			}
 		}
-		return center;
+		return (*this)[center]._val;
 	}
 };
